@@ -1,4 +1,4 @@
-name: Build
+name: Build and Analyze
 
 on:
   push:
@@ -7,47 +7,34 @@ on:
 
 jobs:
   build:
-    name: Build and analyze
+    name: Build and SonarQube Analysis
     runs-on: ubuntu-latest
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for better relevancy of analysis
+          fetch-depth: 0  # Ensure a full clone for SonarQube analysis
 
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'temurin'
+          distribution: 'temurin'  # Using 'temurin' as it is the updated distribution
 
-      - name: Install SonarScanner
-        run: |
-          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-          unzip sonar-scanner-cli-4.6.2.2472-linux.zip -d sonar-scanner
-          ls -l sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin
-          chmod +x sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner
-          echo "${PWD}/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH
-          echo "SonarScanner installed and executable checked."
-
-      - name: Debug PATH and Verify SonarScanner Installation
-        run: |
-          echo "Current PATH: $PATH"
-          ls -l $GITHUB_PATH
-          sonar-scanner --version
-          ls -l ${PWD}/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin
-
-      - name: Run SonarScanner with Debug Logging
-        run: |
-          sonar-scanner -X
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@v2
+        with:
+          sonar-project-key: your-project-key
+          sonar-project-name: your-project-name
+          sonar-project-version: '1.0'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       # Uncomment the following lines if you want to fail the job based on the Quality Gate
       # - name: Check SonarQube Quality Gate
-      #   uses: sonarsource/sonarqube-quality-gate-action@master
+      #   uses: sonarsource/sonarqube-quality-gate-action@v2
       #   timeout-minutes: 5
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
