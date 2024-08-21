@@ -25,14 +25,16 @@ jobs:
       - name: Install SonarScanner
         run: |
           wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-          unzip sonar-scanner-cli-4.6.2.2472-linux.zip
-          echo "${PWD}/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH  # Correct method to update PATH
+          unzip sonar-scanner-cli-4.6.2.2472-linux.zip -d /home/runner/sonar-scanner
+          export PATH=$PATH:/home/runner/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin
 
       - name: Verify SonarScanner Installation
-        run: ls -l ${PWD}/sonar-scanner-4.6.2.2472-linux/bin
+        run: |
+          /home/runner/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner --version
 
       - name: Run SonarScanner with Debug Logging
-        run: sonar-scanner -X
+        run: |
+          /home/runner/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner -X
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
