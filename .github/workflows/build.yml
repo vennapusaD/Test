@@ -22,10 +22,20 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Run SonarScanner
-        uses: sonarsource/sonarqube-scan-action@v2
-        with:
-          entryPoint: sonar-scanner
+      - name: Install SonarScanner
+        run: |
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+          unzip sonar-scanner-cli-4.6.2.2472-linux.zip -d sonar-scanner
+          chmod +x sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner
+          echo "${PWD}/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH
+
+      - name: Verify SonarScanner Installation
+        run: |
+          sonar-scanner --version
+
+      - name: Run SonarScanner with Debug Logging
+        run: |
+          sonar-scanner -X
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
@@ -36,3 +46,4 @@ jobs:
       #   timeout-minutes: 5
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
