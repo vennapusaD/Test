@@ -20,14 +20,30 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '11'
-          distribution: 'temurin'  # Using 'temurin' as it is the updated distribution
+          distribution: 'temurin'
 
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@v2
-        with:
-          sonar-project-key: your-project-key
-          sonar-project-name: your-project-name
-          sonar-project-version: '1.0'
+      - name: Install SonarScanner
+        run: |
+          # Download SonarScanner
+          wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+          
+          # Unzip the downloaded file
+          unzip sonar-scanner-cli-4.6.2.2472-linux.zip -d sonar-scanner
+          
+          # Ensure the `sonar-scanner` binary is executable
+          chmod +x sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner
+          
+          # Add SonarScanner to PATH
+          echo "${PWD}/sonar-scanner/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH
+
+      - name: Verify SonarScanner Installation
+        run: |
+          # Check that SonarScanner is installed correctly
+          sonar-scanner --version
+
+      - name: Run SonarScanner with Debug Logging
+        run: |
+          sonar-scanner -X
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
